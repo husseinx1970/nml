@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: utby-bilservice
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: |
+      corepack enable && corepack prepare pnpm@10.26.1 --activate
+      pnpm install --frozen-lockfile
+      pnpm --filter @workspace/db run push || true
+      pnpm --filter @workspace/workshop run build
+      pnpm --filter @workspace/api-server run build
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ACCESS_CODE
+        value: 19701970hasan
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
