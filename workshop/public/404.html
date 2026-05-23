@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <title>Utby Snabb Bilservice</title>
+    <script>
+      // GitHub Pages SPA fallback: rewrite the URL so the app's router
+      // can take over after the bundle loads.
+      (function () {
+        var segments = location.pathname.split("/").filter(Boolean);
+        var base = segments.length > 0 ? "/" + segments[0] + "/" : "/";
+        if (location.pathname !== base) {
+          history.replaceState(null, "", base);
+          location.replace(base);
+        }
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
