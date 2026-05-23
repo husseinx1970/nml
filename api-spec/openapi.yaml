@@ -1,0 +1,1054 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Utby Snabb Bilservice - Workshop Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: customers
+    description: Customer management
+  - name: vehicles
+    description: Vehicle management
+  - name: invoices
+    description: Invoice management
+  - name: invoice-items
+    description: Invoice line items
+  - name: dashboard
+    description: Dashboard and statistics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── CUSTOMERS ────────────────────────────────────────────────────────────────
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List all customers
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name, email, or phone
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Created customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdate"
+      responses:
+        "200":
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── VEHICLES ─────────────────────────────────────────────────────────────────
+  /vehicles:
+    get:
+      operationId: listVehicles
+      tags: [vehicles]
+      summary: List all vehicles
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+          description: Filter by customer ID
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by registration number, make, or model
+      responses:
+        "200":
+          description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vehicle"
+    post:
+      operationId: createVehicle
+      tags: [vehicles]
+      summary: Create a new vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehicleInput"
+      responses:
+        "201":
+          description: Created vehicle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+
+  /vehicles/{id}:
+    get:
+      operationId: getVehicle
+      tags: [vehicles]
+      summary: Get a vehicle by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vehicle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateVehicle
+      tags: [vehicles]
+      summary: Update a vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehicleUpdate"
+      responses:
+        "200":
+          description: Updated vehicle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+    delete:
+      operationId: deleteVehicle
+      tags: [vehicles]
+      summary: Delete a vehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── INVOICES ─────────────────────────────────────────────────────────────────
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List all invoices
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by invoice number, customer name, or reg number
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, sent, paid, overdue, cancelled]
+          description: Filter by status
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+          description: Filter by customer
+      responses:
+        "200":
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create a new invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceInput"
+      responses:
+        "201":
+          description: Created invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /invoices/{id}:
+    get:
+      operationId: getInvoice
+      tags: [invoices]
+      summary: Get an invoice with all its items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Invoice with items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateInvoice
+      tags: [invoices]
+      summary: Update an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceUpdate"
+      responses:
+        "200":
+          description: Updated invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceDetail"
+    delete:
+      operationId: deleteInvoice
+      tags: [invoices]
+      summary: Delete an invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /invoices/{id}/status:
+    patch:
+      operationId: updateInvoiceStatus
+      tags: [invoices]
+      summary: Update invoice status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceStatusUpdate"
+      responses:
+        "200":
+          description: Updated invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  # ─── INVOICE ITEMS ────────────────────────────────────────────────────────────
+  /invoices/{invoiceId}/items:
+    get:
+      operationId: listInvoiceItems
+      tags: [invoice-items]
+      summary: List all items for an invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of invoice items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InvoiceItem"
+    post:
+      operationId: createInvoiceItem
+      tags: [invoice-items]
+      summary: Add an item to an invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceItemInput"
+      responses:
+        "201":
+          description: Created item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceItem"
+
+  /invoices/{invoiceId}/items/{itemId}:
+    patch:
+      operationId: updateInvoiceItem
+      tags: [invoice-items]
+      summary: Update an invoice item
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceItemUpdate"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceItem"
+    delete:
+      operationId: deleteInvoiceItem
+      tags: [invoice-items]
+      summary: Delete an invoice item
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── DASHBOARD ────────────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-invoices:
+    get:
+      operationId: getRecentInvoices
+      tags: [dashboard]
+      summary: Get recent invoices for dashboard
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recent invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+
+  /dashboard/revenue-by-month:
+    get:
+      operationId: getRevenueByMonth
+      tags: [dashboard]
+      summary: Get monthly revenue data for charts
+      responses:
+        "200":
+          description: Monthly revenue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyRevenue"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    # ─── CUSTOMER ───────────────────────────────────────────────────────────────
+    Customer:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        organizationNumber:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        postalCode:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        reference:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    CustomerInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        organizationNumber:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        postalCode:
+          type: string
+        city:
+          type: string
+        reference:
+          type: string
+        notes:
+          type: string
+
+    CustomerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        organizationNumber:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        postalCode:
+          type: string
+        city:
+          type: string
+        reference:
+          type: string
+        notes:
+          type: string
+
+    # ─── VEHICLE ────────────────────────────────────────────────────────────────
+    Vehicle:
+      type: object
+      required: [id, registrationNumber, createdAt]
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: ["integer", "null"]
+        registrationNumber:
+          type: string
+        make:
+          type: ["string", "null"]
+        model:
+          type: ["string", "null"]
+        year:
+          type: ["integer", "null"]
+        vin:
+          type: ["string", "null"]
+        fuelType:
+          type: ["string", "null"]
+        engineInfo:
+          type: ["string", "null"]
+        mileage:
+          type: ["integer", "null"]
+        firstRegistrationDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    VehicleInput:
+      type: object
+      required: [registrationNumber]
+      properties:
+        customerId:
+          type: integer
+        registrationNumber:
+          type: string
+          minLength: 1
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        vin:
+          type: string
+        fuelType:
+          type: string
+        engineInfo:
+          type: string
+        mileage:
+          type: integer
+        firstRegistrationDate:
+          type: string
+        notes:
+          type: string
+
+    VehicleUpdate:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        registrationNumber:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        vin:
+          type: string
+        fuelType:
+          type: string
+        engineInfo:
+          type: string
+        mileage:
+          type: integer
+        firstRegistrationDate:
+          type: string
+        notes:
+          type: string
+
+    # ─── INVOICE ────────────────────────────────────────────────────────────────
+    Invoice:
+      type: object
+      required: [id, invoiceNumber, status, invoiceDate, createdAt]
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        orderNumber:
+          type: ["string", "null"]
+        offerNumber:
+          type: ["string", "null"]
+        customerId:
+          type: ["integer", "null"]
+        customerName:
+          type: ["string", "null"]
+        customerOrgNumber:
+          type: ["string", "null"]
+        customerEmail:
+          type: ["string", "null"]
+        customerPhone:
+          type: ["string", "null"]
+        customerAddress:
+          type: ["string", "null"]
+        customerPostalCode:
+          type: ["string", "null"]
+        customerCity:
+          type: ["string", "null"]
+        vehicleId:
+          type: ["integer", "null"]
+        registrationNumber:
+          type: ["string", "null"]
+        vehicleMake:
+          type: ["string", "null"]
+        vehicleModel:
+          type: ["string", "null"]
+        vehicleYear:
+          type: ["integer", "null"]
+        vin:
+          type: ["string", "null"]
+        mileage:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+        invoiceDate:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        paymentTerms:
+          type: ["string", "null"]
+        mechanic:
+          type: ["string", "null"]
+        internalReference:
+          type: ["string", "null"]
+        workshopNotes:
+          type: ["string", "null"]
+        subtotal:
+          type: number
+        vatAmount:
+          type: number
+        total:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    InvoiceDetail:
+      type: object
+      required: [id, invoiceNumber, status, invoiceDate, createdAt, items]
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        orderNumber:
+          type: ["string", "null"]
+        offerNumber:
+          type: ["string", "null"]
+        customerId:
+          type: ["integer", "null"]
+        customerName:
+          type: ["string", "null"]
+        customerOrgNumber:
+          type: ["string", "null"]
+        customerEmail:
+          type: ["string", "null"]
+        customerPhone:
+          type: ["string", "null"]
+        customerAddress:
+          type: ["string", "null"]
+        customerPostalCode:
+          type: ["string", "null"]
+        customerCity:
+          type: ["string", "null"]
+        vehicleId:
+          type: ["integer", "null"]
+        registrationNumber:
+          type: ["string", "null"]
+        vehicleMake:
+          type: ["string", "null"]
+        vehicleModel:
+          type: ["string", "null"]
+        vehicleYear:
+          type: ["integer", "null"]
+        vin:
+          type: ["string", "null"]
+        mileage:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+        invoiceDate:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        paymentTerms:
+          type: ["string", "null"]
+        mechanic:
+          type: ["string", "null"]
+        internalReference:
+          type: ["string", "null"]
+        workshopNotes:
+          type: ["string", "null"]
+        subtotal:
+          type: number
+        vatAmount:
+          type: number
+        total:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceItem"
+
+    InvoiceInput:
+      type: object
+      required: [invoiceDate]
+      properties:
+        orderNumber:
+          type: string
+        offerNumber:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        customerOrgNumber:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        customerAddress:
+          type: string
+        customerPostalCode:
+          type: string
+        customerCity:
+          type: string
+        vehicleId:
+          type: integer
+        registrationNumber:
+          type: string
+        vehicleMake:
+          type: string
+        vehicleModel:
+          type: string
+        vehicleYear:
+          type: integer
+        vin:
+          type: string
+        mileage:
+          type: integer
+        invoiceDate:
+          type: string
+        dueDate:
+          type: string
+        paymentTerms:
+          type: string
+        mechanic:
+          type: string
+        internalReference:
+          type: string
+        workshopNotes:
+          type: string
+
+    InvoiceUpdate:
+      type: object
+      properties:
+        orderNumber:
+          type: string
+        offerNumber:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        customerOrgNumber:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        customerAddress:
+          type: string
+        customerPostalCode:
+          type: string
+        customerCity:
+          type: string
+        vehicleId:
+          type: integer
+        registrationNumber:
+          type: string
+        vehicleMake:
+          type: string
+        vehicleModel:
+          type: string
+        vehicleYear:
+          type: integer
+        vin:
+          type: string
+        mileage:
+          type: integer
+        invoiceDate:
+          type: string
+        dueDate:
+          type: string
+        paymentTerms:
+          type: string
+        mechanic:
+          type: string
+        internalReference:
+          type: string
+        workshopNotes:
+          type: string
+
+    InvoiceStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+
+    # ─── INVOICE ITEM ───────────────────────────────────────────────────────────
+    InvoiceItem:
+      type: object
+      required: [id, invoiceId, itemType, description, quantity, unitPrice, vatRate, lineTotal]
+      properties:
+        id:
+          type: integer
+        invoiceId:
+          type: integer
+        itemType:
+          type: string
+          enum: [part, labor, oil, tire_fee, environmental_fee, diagnostic, fixed_price, discount, other]
+        articleNumber:
+          type: ["string", "null"]
+        description:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: ["string", "null"]
+        unitPrice:
+          type: number
+        discountPercent:
+          type: number
+        vatRate:
+          type: number
+        lineTotal:
+          type: number
+        sortOrder:
+          type: integer
+        mechanicName:
+          type: ["string", "null"]
+
+    InvoiceItemInput:
+      type: object
+      required: [itemType, description, quantity, unitPrice, vatRate]
+      properties:
+        itemType:
+          type: string
+          enum: [part, labor, oil, tire_fee, environmental_fee, diagnostic, fixed_price, discount, other]
+        articleNumber:
+          type: string
+        description:
+          type: string
+          minLength: 1
+        quantity:
+          type: number
+        unit:
+          type: string
+        unitPrice:
+          type: number
+        discountPercent:
+          type: number
+          default: 0
+        vatRate:
+          type: number
+          default: 25
+        sortOrder:
+          type: integer
+        mechanicName:
+          type: string
+
+    InvoiceItemUpdate:
+      type: object
+      properties:
+        itemType:
+          type: string
+          enum: [part, labor, oil, tire_fee, environmental_fee, diagnostic, fixed_price, discount, other]
+        articleNumber:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        unitPrice:
+          type: number
+        discountPercent:
+          type: number
+        vatRate:
+          type: number
+        sortOrder:
+          type: integer
+        mechanicName:
+          type: string
+
+    # ─── DASHBOARD ──────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalCustomers, totalVehicles, totalInvoices, totalRevenue, draftCount, sentCount, paidCount, overdueCount, monthlyRevenue]
+      properties:
+        totalCustomers:
+          type: integer
+        totalVehicles:
+          type: integer
+        totalInvoices:
+          type: integer
+        totalRevenue:
+          type: number
+        draftCount:
+          type: integer
+        sentCount:
+          type: integer
+        paidCount:
+          type: integer
+        overdueCount:
+          type: integer
+        monthlyRevenue:
+          type: number
+
+    MonthlyRevenue:
+      type: object
+      required: [month, year, revenue, invoiceCount]
+      properties:
+        month:
+          type: integer
+        year:
+          type: integer
+        revenue:
+          type: number
+        invoiceCount:
+          type: integer

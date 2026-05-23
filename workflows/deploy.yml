@@ -1,0 +1,71 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine base path
+        id: base
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ "$REPO_NAME" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
+            echo "base=/" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=/${REPO_NAME}/" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build site
+        env:
+          BASE_PATH: ${{ steps.base.outputs.base }}
+          NODE_ENV: production
+        run: pnpm --filter @workspace/workshop run build
+
+      - name: Add SPA fallback (404.html)
+        run: cp artifacts/workshop/dist/public/index.html artifacts/workshop/dist/public/404.html
+
+      - name: Disable Jekyll
+        run: touch artifacts/workshop/dist/public/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/workshop/dist/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "wRoAjgNWjBf9WbF4zUBvx"
+uri = "file://artifacts/workshop/public/utby-bilservice-source.tar.gz"
+type = "unspecified"
+title = "Utby Snabb Bilservice — Källkod (tar.gz)"
+
+[[outputs]]
+id = "8vzA4vy0SMtt5IXX_RawM"
+uri = "file://downloads/utby-bilservice-source.tar.gz"
+type = "unspecified"
+title = "utby-bilservice-source.tar.gz (med Render-deploy)"
+
+[[outputs]]
+id = "57LAk0NyWFxgi92klBimg"
+uri = "file://downloads/utby-bilservice-source.zip"
+type = "unspecified"
+title = "Utby Bilservice — källkod (lokal SQLite-version)"
